@@ -1,0 +1,132 @@
+<!DOCTYPE HTML>
+<html lang="ru">
+	<head>
+		<meta charset="utf-8">
+		<title>Форма для ввода</title>
+		<link rel="stylesheet" href="style.css">
+		<script src="program.js"></script>
+	</head>
+	<body>
+		<div class="form-main">
+			<form class="form-calc" id="form-calculate" onsubmit="return false">
+				<div class="clearfix">
+					<div class="form-group left-part">
+            			<label for="currency">Валюта стоимости</label><br>
+            			<select name="currency" id="currency" required>
+              				<!-- <option value="1">Доллары США</option> -->
+              				<!-- <option value="2">Евро</option> -->
+              				<!-- <option value="3">Рубли</option> -->
+            			</select>
+          			</div>
+					<div class="form-group right-part">
+						<label for="weight">Вес (в кг)</label><br>
+						<input type="number" name="weight" id="weight" min="1" max="100" step="0.01" required>
+					</div>
+				</div>
+				<div class="clearfix">
+					<div class="form-group left-part">
+						<label for="cost">Стоимость</label><br>
+						<input type="number" name="cost" id="cost" min="1" max="100000" step="0.01" required>
+					</div>
+          			<div class="form-group right-part">
+            			<label for="import">Способ ввоза</label><br>
+            			<select name="import" id="import" required>
+              				<!-- <option value="1">Сопровождаемый багаж</option> -->
+              				<!-- <option value="2">Несопровождаемый багаж</option> -->
+              				<!-- <option value="3">Доставка перевозчиком</option> -->
+              				<!-- <option value="4">Почтовое отправление</option> -->
+            			</select>
+          			</div>
+          		</div>
+          		<div class="clearfix">
+          			<div class="form-group left-part">
+            			<label for="transport">Вид транспорта</label><br>
+            			<select name="transport" id="transport">
+              				<!-- <option value="1" id="air">Воздушный</option> -->
+              				<!-- <option value="2" id="other">Другой</option> -->
+            			</select>
+          			</div>
+          			<div class="right-part">
+          				<p class="transport-title">Выбор доступен при ввозе товаров в сопровождаемом или несопровождаемом багаже</p>
+          			</div>
+          		</div>
+				<p class="group-title">Внесите сведения о товарах в случае их ввоза</p>
+				<div class="clearfix">
+					<div class="left-part">
+					<div class="form-group goods-other">
+						<label for="alcohol">Алкогольные напитки и пиво</label><br>
+						<input type="number" name="alcohol" id="alcohol" min="1" step="1" max="5"> литра(ов)
+					</div>
+					<div class="form-group goods-other">
+						<label for="ethanol">Этиловый спирт</label><br>
+						<input type="number" name="ethanol" id="ethanol" min="1" step="1" max="5"> литра(ов)
+					</div>
+				</div>
+					<div class="right-part">
+          				<p class="transport-title title-2">Ввод значений недоступен при пересылке товаров в международных почтовых отправлениях. Максимальный объем ввоза &ndash; 5 литров</p>
+          			</div>
+				</div>
+				<div class="form-group">
+					<label for="result" class="result-title">Результаты расчетов</label>
+					<textarea name="result" id="result" style="margin-bottom: 70px" readonly></textarea>
+				</div>
+				<input type="submit" value="Рассчитать платежи" class="button-btn" name="btnSubmit">
+			</form>
+		</div>
+		<script>
+			window.onload = function() {
+				var infoArray;
+				let form = document.getElementById("form-calculate");
+				calcFunction = function() {
+					let cost = parseInt(form.cost.value, 10);
+					let weight = parseInt(form.weight.value, 10);
+					let currency = parseInt(form.currency.value, 10);
+					let importWay = parseInt(form.import.value, 10);
+					let transport = parseInt(form.transport.value, 10);
+					let alcohol = parseInt(form.alcohol.value, 10);
+					let ethanol = parseInt(form.ethanol.value, 10);
+					form.result.value =  resultFunction(cost, weight, currency, importWay, transport, alcohol,ethanol);
+				}
+
+				form.import.onclick = function() {
+					if (document.getElementById("import").value == 3) {
+						document.getElementById("transport").disabled = true;
+					} else if (document.getElementById("import").value == 4) {
+						document.getElementById("transport").disabled = true;
+						document.getElementById("alcohol").disabled = true;
+						document.getElementById("ethanol").disabled = true;
+					} else if (document.getElementById("import").value == 1 || document.getElementById("import").value == 2) {
+						document.getElementById("transport").disabled = false;
+						document.getElementById("alcohol").disabled = false;
+						document.getElementById("ethanol").disabled = false;
+					}
+				}
+
+				form.btnSubmit.onclick = function() {
+					form.addEventListener("submit", calcFunction);
+				}
+				
+				form.transport.onload = fillFormField(1, "transport");
+				form.import.onload = fillFormField(2, "import");
+				form.currency.onload = fillFormField(3, "currency");
+
+				function fillFormField(query_num, list_id) {
+				  if (query_num == "") {
+					document.getElementById(list_id).innerHTML = "";
+					return;
+				  } else { 
+					var xmlhttp = new XMLHttpRequest();
+					xmlhttp.onreadystatechange = function() {
+					  if (this.readyState == 4 && this.status == 200) {
+						document.getElementById(list_id).innerHTML = this.responseText;
+					  }
+					};
+					xmlhttp.open("GET","db_scripts/db_query.php?q="+query_num,true);
+					xmlhttp.send();
+				  }
+				}
+	
+			}
+		</script>
+	</body>
+	</html>
